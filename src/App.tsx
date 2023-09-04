@@ -40,6 +40,13 @@ function App() {
     };
   }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
 
+  function setColorInterval(r:number,c:number,fr:(r:number)=>number,fc:(c:number)=>number, breakIf: (r: number, c: number)=>boolean){
+    if(breakIf(r,c)) return;
+    colorPixels([{rowIndex: r, columnIndex: c, color: "red"}]);
+    setTimeout(()=>setColorInterval(r+fr(r), c+fc(c), fr, fc, breakIf), 40);
+    console.log(r,c);
+  }
+
   useEffect(() => {
     const onCanvasClickListener = () => {
       // TASK: Make a firework effect when the user clicks on the canvas.
@@ -55,6 +62,25 @@ function App() {
         console.log(
           `You clicked on rowIndex: ${hoveredPixel.rowIndex}, columnIndex: ${hoveredPixel.columnIndex}`
         );
+
+        const [br, tr, rc, lc] = [indices.bottomRowIndex, indices.topRowIndex, indices.rightColumnIndex, indices.leftColumnIndex];
+
+        // const arr= [];
+        // let [x, y]= [hoveredPixel.columnIndex, hoveredPixel.rowIndex];
+        // while(x<=rc && y<=br) arr.push({rowIndex: y++, columnIndex: x++, color: "red"});
+        // [x, y]= [hoveredPixel.columnIndex, hoveredPixel.rowIndex];
+        // while(x>=lc && y>=tr) arr.push({rowIndex: y--, columnIndex: x--, color: "red"});
+        // [x, y]= [hoveredPixel.columnIndex, hoveredPixel.rowIndex];
+        // while(x<=rc && y>=tr) arr.push({rowIndex: y--, columnIndex: x++, color: "red"});
+        // [x, y]= [hoveredPixel.columnIndex, hoveredPixel.rowIndex];
+        // while(x>=lc && y<=br) arr.push({rowIndex: y++, columnIndex: x--, color: "red"});
+        // colorPixels(arr);
+
+        setColorInterval(hoveredPixel.rowIndex, hoveredPixel.columnIndex, (r)=>1, (c)=>1, (r,c)=>r> br || c> rc);
+        setColorInterval(hoveredPixel.rowIndex, hoveredPixel.columnIndex, (r)=>1, (c)=>-1, (r,c)=>r> br || c< lc);
+        setColorInterval(hoveredPixel.rowIndex, hoveredPixel.columnIndex, (r)=>-1, (c)=>1, (r,c)=>r< tr || c> rc);
+        setColorInterval(hoveredPixel.rowIndex, hoveredPixel.columnIndex, (r)=>-1, (c)=>-1, (r,c)=>r< tr || c< lc);
+
       }
       // Modify ⬆️
     };
@@ -93,6 +119,8 @@ function App() {
             top: "10px",
           }}
         >
+          Your canvas indices: {indices.leftColumnIndex},{indices.topRowIndex} ~ {indices.rightColumnIndex},{indices.bottomRowIndex}
+          <br />
           You are hoveing rowIndex: {hoveredPixel.rowIndex}, columnIndex:{" "}
           {hoveredPixel.columnIndex}
         </div>
