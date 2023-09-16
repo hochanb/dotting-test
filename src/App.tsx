@@ -3,12 +3,29 @@ import {
   CanvasHoverPixelChangeHandler,
   Dotting,
   DottingRef,
+  PixelModifyItem,
   useBrush,
   useData,
   useDotting,
   useGrids,
   useHandlers,
 } from "dotting";
+
+import { data_A, data_B, data_C } from "./alphabet";
+
+const CreateEmptySquareData = (
+  size: number,
+): Array<Array<PixelModifyItem>> => {
+  const data: Array<Array<PixelModifyItem>> = [];
+  for (let i = 0; i < size; i++) {
+    const row: Array<PixelModifyItem> = [];
+    for (let j = 0; j < size; j++) {
+      row.push({ rowIndex: i, columnIndex: j, color: "" });
+    }
+    data.push(row);
+  }
+  return data;
+};
 
 function App() {
   const ref = useRef<DottingRef>(null);
@@ -25,6 +42,27 @@ function App() {
     columnIndex: number;
   } | null>(null);
 
+  const emptyData= CreateEmptySquareData(28);
+  const data=useData(ref);
+
+  useEffect(()=>{
+    document.addEventListener("keydown", (e)=>{
+      console.log("pressed key: "+e.key);
+      switch(e.key){
+        case 'a'||'A':
+          ref.current?.setData(data_A);
+          break;
+        case 'b'||'B':
+          ref.current?.setData(data_B);
+          break;
+        case 'c'||'C':
+          ref.current?.setData(data_C);
+          break;
+      }
+    })
+  }
+  ,[]);
+
   useEffect(() => {
     const hoverPixelChangeListener: CanvasHoverPixelChangeHandler = (pixel) => {
       const { indices } = pixel;
@@ -34,9 +72,9 @@ function App() {
         setHoveredPixel(null);
       }
     };
-    addHoverPixelChangeListener(hoverPixelChangeListener);
+    // addHoverPixelChangeListener(hoverPixelChangeListener);
     return () => {
-      removeHoverPixelChangeListener(hoverPixelChangeListener);
+      // removeHoverPixelChangeListener(hoverPixelChangeListener);
     };
   }, [addHoverPixelChangeListener, removeHoverPixelChangeListener]);
 
@@ -97,10 +135,14 @@ function App() {
     dimensions,
   ]);
 
+  const onClickLogData=()=>{
+    console.log(data.dataArray);
+  }
+
   return (
     <div
       style={{
-        backgroundColor: "#282c34",
+        // backgroundColor: "#282c34",
         minHeight: "100vh",
         display: "flex",
         justifyContent: "center",
@@ -125,7 +167,10 @@ function App() {
           {hoveredPixel.columnIndex}
         </div>
       )}
-      <Dotting width={500} height={500} ref={ref} />
+      <Dotting width={800} height={800} ref={ref} initLayers={[{id:"layer1",data:emptyData}]} />
+      <div style={{ marginTop: "20px", width:40, height:40, background:'pink', zIndex:2 }} onClick={onClickLogData}>
+          log data
+      </div>
     </div>
   );
 }
